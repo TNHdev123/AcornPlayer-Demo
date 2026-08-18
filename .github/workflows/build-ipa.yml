@@ -20,15 +20,15 @@ jobs:
       run: |
         mkdir -p build/Payload
         
-        # 使用 swift build 自動編譯
-        swift build -c release
+        # 指定 iOS SDK 進行編譯
+        swift build -c release --sdk $(xcrun --sdk iphoneos --show-sdk-path) --triple arm64-apple-ios15.0
         
-        # 建立 basic Payload 結構
+        # 建立 Payload 結構
         mkdir -p build/Payload/AcornPlayerDemo.app
         
-        # 複製編譯出來的執行檔與 Info.plist
-        if [ -d ".build/release" ]; then
-          cp .build/release/AcornPlayerDemo build/Payload/AcornPlayerDemo.app/
+        # 複製執行檔與 Info.plist
+        if [ -d ".build/arm64-apple-ios15.0/release" ]; then
+          cp .build/arm64-apple-ios15.0/release/AcornPlayerDemo build/Payload/AcornPlayerDemo.app/
         fi
         
         if [ -f "AcornPlayerDemo/Info.plist" ]; then
