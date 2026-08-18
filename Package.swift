@@ -12,7 +12,8 @@ let package = Package(
     targets: [
         .executableTarget(
             name: "AcornPlayerDemo",
-            path: "AcornPlayerDemo"
+            path: "AcornPlayerDemo",
+            exclude: ["Info.plist"]
         )
     ]
 )
