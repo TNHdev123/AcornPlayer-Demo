@@ -14,23 +14,23 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Set up Swift / Xcode
-      run: xcodeselect -p
+      run: xcode-select -p
 
     - name: Build and Package IPA
       run: |
         mkdir -p build/Payload
         
-        # 使用 xcodebuild 或 swift build 自動編譯
-        swift build -c release --triple arm64-apple-ios15.0-simulator
+        # 使用 swift build 自動編譯
+        swift build -c release
         
         # 建立 basic Payload 結構
         mkdir -p build/Payload/AcornPlayerDemo.app
         
-        if [ -d ".build/arm64-apple-macosx/release/AcornPlayerDemo" ]; then
-          cp .build/arm64-apple-macosx/release/AcornPlayerDemo build/Payload/AcornPlayerDemo.app/
+        # 複製編譯出來的執行檔與 Info.plist
+        if [ -d ".build/release" ]; then
+          cp .build/release/AcornPlayerDemo build/Payload/AcornPlayerDemo.app/
         fi
         
-        # 複製 Info.plist 如果存在
         if [ -f "AcornPlayerDemo/Info.plist" ]; then
           cp AcornPlayerDemo/Info.plist build/Payload/AcornPlayerDemo.app/
         fi
