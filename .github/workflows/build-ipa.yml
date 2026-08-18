@@ -13,32 +13,31 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    - name: Set up Swift / Xcode
+    - name: Set up Xcode
       run: xcode-select -p
 
     - name: Build and Package IPA
       run: |
-        mkdir -p build/Payload/AcornPlayerDemo.app
+        mkdir -p build/Payload
         
-        # 指定 iOS SDK 進行 Release 編譯
-        swift build -c release --sdk $(xcrun --sdk iphoneos --show-sdk-path) --triple arm64-apple-ios15.0
+        # 1. 使用 xcodebuild 針對 iOS 裝置（arm64）進行專案編譯
+        xcodebuild build \
+          -scheme AcornPlayerDemo \
+          -destination 'generic/platform=iOS' \
+          -configuration Release \
+          -derivedDataPath build/DerivedData \
+          CODE_SIGN_IDENTITY="" \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGNING_ALLOWED=NO
+
+        # 2. 尋找編譯出來的標準 .app 包並複製到 Payload
+        APP_PATH=$(find build/DerivedData -name "AcornPlayerDemo.app" -type d | head -n 1)
+        cp -R "$APP_PATH" build/Payload/
         
-        # 尋找並複製編譯好的 Main Binary
-        BINARY_PATH=$(find .build -name "AcornPlayerDemo" -type f | head -n 1)
-        cp "$BINARY_PATH" build/Payload/AcornPlayerDemo.app/AcornPlayerDemo
-        
-        # 賦予執行檔可執行權限
-        chmod +x build/Payload/AcornPlayerDemo.app/AcornPlayerDemo
-        
-        # 複製 Info.plist
-        if [ -f "AcornPlayerDemo/Info.plist" ]; then
-          cp AcornPlayerDemo/Info.plist build/Payload/AcornPlayerDemo.app/
-        fi
-        
-        # 打包為 IPA
+        # 3. 打包成 IPA
         cd build
         zip -r AcornPlayerDemo.ipa Payload
-        
+
     - name: Upload IPA Artifact
       uses: actions/upload-artifact@v4
       with:
