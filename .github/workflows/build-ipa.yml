@@ -18,23 +18,24 @@ jobs:
 
     - name: Build and Package IPA
       run: |
-        mkdir -p build/Payload
-        
-        # 指定 iOS SDK 進行編譯
-        swift build -c release --sdk $(xcrun --sdk iphoneos --show-sdk-path) --triple arm64-apple-ios15.0
-        
-        # 建立 Payload 結構
         mkdir -p build/Payload/AcornPlayerDemo.app
         
-        # 複製執行檔與 Info.plist
-        if [ -d ".build/arm64-apple-ios15.0/release" ]; then
-          cp .build/arm64-apple-ios15.0/release/AcornPlayerDemo build/Payload/AcornPlayerDemo.app/
-        fi
+        # 指定 iOS SDK 進行 Release 編譯
+        swift build -c release --sdk $(xcrun --sdk iphoneos --show-sdk-path) --triple arm64-apple-ios15.0
         
+        # 尋找並複製編譯好的 Main Binary
+        BINARY_PATH=$(find .build -name "AcornPlayerDemo" -type f | head -n 1)
+        cp "$BINARY_PATH" build/Payload/AcornPlayerDemo.app/AcornPlayerDemo
+        
+        # 賦予執行檔可執行權限
+        chmod +x build/Payload/AcornPlayerDemo.app/AcornPlayerDemo
+        
+        # 複製 Info.plist
         if [ -f "AcornPlayerDemo/Info.plist" ]; then
           cp AcornPlayerDemo/Info.plist build/Payload/AcornPlayerDemo.app/
         fi
         
+        # 打包為 IPA
         cd build
         zip -r AcornPlayerDemo.ipa Payload
         
